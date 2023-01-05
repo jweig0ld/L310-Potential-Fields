@@ -1,9 +1,6 @@
 import numpy as np
 
 
-G = 6.67 * 10^-11 # Newtonian Constant of Gravity
-
-
 class Planet:
     def __init__(self, position, radius, mass):
         self.position = position
@@ -28,30 +25,57 @@ class Asteroid:
 
 
 class Environment:
-    def __init__(self, xlen, ylen, spaceships, asteroids, planets, dt):
+    def __init__(self, xlen, ylen, spaceships, asteroids, planets, dt, max_t, navigator):
         self.xlen = xlen
         self.ylen = ylen
         self.spaceships = spaceships
         self.asteroids = asteroids
         self.planets = planets
         self.dt = dt
+        self.max_t = max_t
+        self.navigator = navigator
+        self._spaceship_trajectories = []
+        self._asteroid_trajectories = []
+        self._t = 0
 
-    def step():
-        _step_asteroid()
-        _step_spaceship()
+    def _add_spaceship_pos(spaceship_idx, pos):
+        self._spaceship_trajectories[spaceship_idx].append(pos)
     
-    def _step_asteroid():
-        for asteroid in self.asteroids:
-            f_res = np.zeros(3)
+    def _add_asteroid_pos(asteroid_idx, pos):
+        self._asteroid_trajectories[asteroid_idx].append(pos)
 
-            # Compute new asteroid velocity
-            for planet in self.planets:
-                r = asteroid.position - planet.position
-                distance = np.sqrt(np.sum(np.square(r)))
-                r_hat = r / np.linalg.norm(r)
-                f_res += ((G * planet.mass * asteroid.mass) / distance) * r_hat
-                
-            # Update position and velocity based on new velocity
-            dp = asteroid.velocity * dt + (f_res / (2 * asteroid.mass)) * self.dt ** 2
-            asteroid.position += dp
-            asteroid.velocity = asteroid.velocity + (f_res / asteroid.mass) * self.dt
+    def _evaluate_collisions():
+        """
+        Returns a list of collisions (empty if none take place). Each element of
+        the list is a dictionary describing the two colliding objects and the
+        location at which they collided.
+        """
+        pass
+    
+    def _step_spaceships():
+        """
+        Given current state of the environment, increment all of the positions of the
+        spaceships in the environment.
+        """
+        for i, spaceship in enumerate(self.spaceships):
+            spaceship.position = self.navigator.vector(self, i)
+            self._add_spaceship_pos(i, spaceship.position)
+
+    def _step_asteroids():
+        """
+        Given current state of the environment, increment all of the positions of the
+        spaceships in the environment.
+        """
+        for i, asteroid in enumerate(self.asteroids):
+            asteroid.position = asteroid.position + asteroid.velocity * self.dt
+            self._add_asteroid_pos(i, asteroid.position)
+
+    def run():
+
+        while self._t < self.max_t:
+            self._step_asteroids()
+            self._step_spaceships()
+            self._t += self.dt
+
+        collisions = self._evaluate_collisions()
+        return self._spaceship_trajectories, self._asteroid_trajectories, collisions
