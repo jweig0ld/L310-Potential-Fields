@@ -14,11 +14,10 @@ class Planet:
 
 
 class Spaceship:
-    def __init__(self, position, radius, goal, navigator):
+    def __init__(self, position, radius, goal):
         self.position = position
         self.radius = radius
         self.goal = goal
-        self.navigator = navigator
 
 
 class Asteroid:
@@ -30,9 +29,10 @@ class Asteroid:
 
 
 class Environment:
-    def __init__(self, xlen, ylen, spaceships, asteroids, planets, dt, max_t, navigator):
+    def __init__(self, xlen, ylen, zlen, spaceships, asteroids, planets, dt, max_t, navigator):
         self.xlen = xlen
         self.ylen = ylen
+        self.zlen = zlen
         self.spaceships = spaceships
         self.asteroids = asteroids
         self.planets = planets
@@ -48,6 +48,15 @@ class Environment:
     
     def _add_asteroid_pos(asteroid_idx, pos):
         self._asteroid_trajectories[asteroid_idx].append(pos)
+
+    def _sanitise_position(pos):
+        """
+        Given a 3D position `pos`, ensures that the position lies witin the
+        allowed scope of the environment.
+        """
+        return np.clip(pos, 
+                       [-self.xlen / 2, -self.ylen / 2, -self.zlen / 2],
+                       [self.xlen / 2, self.ylen / 2, self.zlen / 2])
 
     def _check_collision(spaceship_idx, t):
         """
@@ -107,7 +116,7 @@ class Environment:
         spaceships in the environment.
         """
         for i, spaceship in enumerate(self.spaceships):
-            spaceship.position = self.navigator.vector(self, i)
+            spaceship.position = self._sanitise_position(self.navigator.vector(self, i))
             self._add_spaceship_pos(i, spaceship.position)
 
     def _step_asteroids():
@@ -116,7 +125,7 @@ class Environment:
         spaceships in the environment.
         """
         for i, asteroid in enumerate(self.asteroids):
-            asteroid.position = asteroid.position + asteroid.velocity * self.dt
+            asteroid.position = self._sanitise_position(asteroid.position + asteroid.velocity * self.dt)
             self._add_asteroid_pos(i, asteroid.position)
 
     def run():
