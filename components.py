@@ -1,6 +1,11 @@
 import numpy as np
 
 
+ASTEROID_COLLISION = 0
+PLANET_COLLISION = 1
+SPACESHIP_COLLISION = 2
+
+
 class Planet:
     def __init__(self, position, radius, mass):
         self.position = position
@@ -44,13 +49,57 @@ class Environment:
     def _add_asteroid_pos(asteroid_idx, pos):
         self._asteroid_trajectories[asteroid_idx].append(pos)
 
+    def _check_collision(spaceship_idx, t):
+        """
+        Returns None if no collision, otherwise returns tuple (spaceship_idx, type, 
+        idx, pos) where `type` either indicates whether the spaceship has collided 
+        with a Planet, Asteroid or Spaceship, idx represents the index of the 
+        colliding object and pos is the position of the collision.
+        """
+
+        # Asteroid Collision Check
+        for i in range(len(self._asteroid_trajectories)):
+            asteroid_pos = self._asteroid_trajectories[i][t/self.dt]
+            spaceship_pos = self._spaceship_trajectories[spaceship_idx][t/self.dt]
+            dist = np.sqrt(np.sum(np.square(spaceship_pos - asteroid_pos)))
+
+            if dist < self.asteroids[i].radius:
+                # We only care about the first collision
+                return (spaceship_idx, ASTEROID_COLLISION, i, spaceship_pos)
+            
+        # Planetary Collision Check
+        for i, planet in self.planets:
+            spaceship_pos = self._spaceship_trajectories[spaceship_idx][t/self.dt]
+            dist = np.sqrt(np.sum(np.square(spaceship_pos - planet.position)))
+
+            if dist < planet.radius:
+                return (spaceship_idx, PLANET_COLLISION, i, spaceship_pos)
+
+        # Spaceship Collision Check
+        for i, other_spaceship in self.spaceships:
+            cur_spaceship_pos = self._spaceship_trajectories[spaceship_idx][t/self.dt]
+            other_spaceship_pos = self._spaceship_trajectories[i][t/self.dt]
+            dist = np.sqrt(np.sum(np.square(spaceship_pos - other_spaceship_pos)))
+
+            if dist < other_spaceship.radius:
+                return (spaceship_idx, SPACESHIP_COLLISION, i, spaceship_pos)
+        
+        return None
+
     def _evaluate_collisions():
         """
         Returns a list of collisions (empty if none take place). Each element of
         the list is a dictionary describing the two colliding objects and the
         location at which they collided.
         """
-        pass
+        collisions = []
+        for spaceship_idx, spaceship in self.spaceships:
+            for t in range(0, self.max_t, self.dt):
+                res = self._check_collision(spaceship_idx, t)
+                if res:
+                    collisions.append(res)
+        
+        return collisions
     
     def _step_spaceships():
         """
