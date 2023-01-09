@@ -13,8 +13,8 @@ TODO:
 
 1. (DONE). Plot the grid in 2D at z=0. 
 2. (DONE). Plot the planets on the grid in 2D, where z=0.
-3. Plot the asteroids on the grid in 2D, where z=0.
-4. Plot the trajectories of the asteroids on the grid in 2D, where z=0.
+3. (DONE). Plot the asteroids on the grid in 2D, where z=0.
+4. (DONE). Plot the trajectories of the asteroids on the grid in 2D, where z=0.
 5. Plot the spaceships on the grid in 2D, where z=0.
 6. Plot the trajectories of the spaceships on the grid, where z=0.
 7. Plot the vector field of a spaceship where z=0.
@@ -26,8 +26,11 @@ def find_circle(c, r, z=0):
     """
     Returns the centre and radius of the circle that results from the
     intersection of the plane z=k and the sphere with centre `c` and 
-    radius `r`.
+    radius `r`. If there is no intersection, return (None, None).
     """
+    if not (z > c[2] - r and z < c[2] + r):
+        return (None, None)
+
     centre = c.copy()
     centre[2] = z
     d = z - c[2] # Distance between centre of resultant circle and plane z=k.
@@ -48,15 +51,42 @@ def plot_env(env, z=0, filename=None):
     plt.ylim([-env.ylen/2 - GRID_OFFSET, env.ylen/2 + GRID_OFFSET])
 
     # Planets
-    for planet in env.planets:
+    for i, planet in enumerate(env.planets):
         centre, radius = find_circle(planet.position, planet.radius, z)
+        if centre is not None: # If there is an intersection, draw planets in green.
+            xs = np.linspace(0., 2 * np.pi, RESOLUTION)
+            x = np.cos(xs) * radius + centre[0]
+            y = np.sin(xs) * radius + centre[1]
+            plt.plot(x, y, 'g')
 
-        # Draw planets in red
-        xs = np.linspace(0., 2 * np.pi, RESOLUTION)
-        x = np.cos(xs) * radius + centre[0]
-        y = np.sin(xs) * radius + centre[1]
-        plt.plot(x, y, 'r')
+    # Asteroids
+    for i, asteroid in enumerate(env.asteroids):
+        centre, radius = find_circle(asteroid.position, asteroid.radius, z)
+        if centre is not None: # If there is an intersection, draw asteroids in red.
+            xs = np.linspace(0., 2 * np.pi, RESOLUTION)
+            x = np.cos(xs) * radius + centre[0]
+            y = np.sin(xs) * radius + centre[1]
+            plt.plot(x, y, 'r')
 
+            # Also draw asteroid trajectories in red
+            positions = np.stack(env._asteroid_trajectories[i])
+            x, y = positions[:, 0], positions[:, 1]
+            plt.plot(x, y, 'r')
+    
+    # Spaceships
+    for i, spaceship in enumerate(env.spaceships):
+        centre, radius = find_circle(spaceship.position, spaceship.radius, z)
+        if centre is not None: # If there is an intersection, draw spaceships in blue.
+            xs = np.linspace(0., 2 * np.pi, RESOLUTION)
+            x = np.cos(xs) * radius + centre[0]
+            y = np.sin(xs) * radius + centre[1]
+            plt.plot(x, y, 'b')
+
+            # Also draw spaeship trajectories in blue
+            positions = np.stack(env._spaceship_trajectories[i])
+            x, y = positions[:, 0], positions[:, 1]
+            plt.plot(x, y, 'b')
+        
     if filename:
         plt.savefig(filename)
 
