@@ -38,8 +38,7 @@ def find_circle(c, r, z=0):
     return centre, radius
 
 
-def plot_env(env, z=0, filename=None):
-    # Walls 
+def plot_walls(env, z=0):
     plt.plot([-env.xlen/2, env.xlen/2], [-env.ylen/2, -env.ylen/2], 'k') # Bottom
     plt.plot([-env.xlen/2, -env.xlen/2], [-env.ylen/2, env.ylen/2], 'k') # Left
     plt.plot([env.xlen/2, env.xlen/2], [-env.ylen/2, env.ylen/2], 'k') # Right
@@ -50,42 +49,44 @@ def plot_env(env, z=0, filename=None):
     plt.xlim([-env.xlen/2 - GRID_OFFSET, env.xlen/2 + GRID_OFFSET])
     plt.ylim([-env.ylen/2 - GRID_OFFSET, env.ylen/2 + GRID_OFFSET])
 
-    # Planets
-    for i, planet in enumerate(env.planets):
-        centre, radius = find_circle(planet.position, planet.radius, z)
+
+def plot_lines(lst, color_str=None):
+    """
+    For a list of lists of numpy arrays of 3D points, plot the x 
+    and y components of the 3D points in the color `color_str`.
+    """
+    color_str = color_str if color_str is not None else 'k'
+    for line in lst:    
+        points = np.stack(line)
+        x, y = points[:, 0], points[:, 1]
+        plt.plot(x, y, color_str)
+
+
+def plot_circular_objs(lst, z=0, color_str=None):
+    """
+    For a list of circular objects `lst` like Planets, Asteroids
+    and Spaceships (which MUST have a position and radius), plot
+    the circular objects in the color `color_str`.
+    """
+    for i, circle in enumerate(lst):
+        centre, radius = find_circle(circle.position, circle.radius, z)
         if centre is not None: # If there is an intersection, draw planets in green.
             xs = np.linspace(0., 2 * np.pi, RESOLUTION)
             x = np.cos(xs) * radius + centre[0]
             y = np.sin(xs) * radius + centre[1]
-            plt.plot(x, y, 'g')
 
-    # Asteroids
-    for i, asteroid in enumerate(env.asteroids):
-        centre, radius = find_circle(asteroid.position, asteroid.radius, z)
-        if centre is not None: # If there is an intersection, draw asteroids in red.
-            xs = np.linspace(0., 2 * np.pi, RESOLUTION)
-            x = np.cos(xs) * radius + centre[0]
-            y = np.sin(xs) * radius + centre[1]
-            plt.plot(x, y, 'r')
+            # Default to black if no color specified
+            color_str = color_str if color_str is not None else 'k'
+            plt.plot(x, y, color_str)
 
-            # Also draw asteroid trajectories in red
-            positions = np.stack(env._asteroid_trajectories[i])
-            x, y = positions[:, 0], positions[:, 1]
-            plt.plot(x, y, 'r')
-    
-    # Spaceships
-    for i, spaceship in enumerate(env.spaceships):
-        centre, radius = find_circle(spaceship.position, spaceship.radius, z)
-        if centre is not None: # If there is an intersection, draw spaceships in blue.
-            xs = np.linspace(0., 2 * np.pi, RESOLUTION)
-            x = np.cos(xs) * radius + centre[0]
-            y = np.sin(xs) * radius + centre[1]
-            plt.plot(x, y, 'b')
 
-            # Also draw spaeship trajectories in blue
-            positions = np.stack(env._spaceship_trajectories[i])
-            x, y = positions[:, 0], positions[:, 1]
-            plt.plot(x, y, 'b')
+def plot_env(env, z=0, filename=None):
+    plot_walls(env, z=z)
+    plot_circular_objs(env.planets, z=z, color_str='g')
+    plot_circular_objs(env.asteroids, z=z, color_str='r')
+    plot_circular_objs(env.spaceships, z=z, color_str='b')
+    plot_lines(env._asteroid_trajectories, color_str='r')
+    plot_lines(env._spaceship_trajectories, color_str='b')
         
     if filename:
         plt.savefig(filename)
