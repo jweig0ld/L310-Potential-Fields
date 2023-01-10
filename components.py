@@ -70,11 +70,13 @@ class Environment:
         with a Planet, Asteroid or Spaceship, idx represents the index of the 
         colliding object and pos is the position of the collision.
         """
+        index = int(t/self.dt)
 
         # Asteroid Collision Check
         for i in range(len(self._asteroid_trajectories)):
-            asteroid_pos = self._asteroid_trajectories[i][t/self.dt]
-            spaceship_pos = self._spaceship_trajectories[spaceship_idx][t/self.dt]
+            
+            asteroid_pos = self._asteroid_trajectories[i][index]
+            spaceship_pos = self._spaceship_trajectories[spaceship_idx][index]
             dist = np.sqrt(np.sum(np.square(spaceship_pos - asteroid_pos)))
 
             if dist < self.asteroids[i].radius:
@@ -83,7 +85,7 @@ class Environment:
             
         # Planetary Collision Check
         for i, planet in enumerate(self.planets):
-            spaceship_pos = self._spaceship_trajectories[spaceship_idx][t/self.dt]
+            spaceship_pos = self._spaceship_trajectories[spaceship_idx][index]
             dist = np.sqrt(np.sum(np.square(spaceship_pos - planet.position)))
 
             if dist < planet.radius:
@@ -91,8 +93,8 @@ class Environment:
 
         # Spaceship Collision Check
         for i, other_spaceship in enumerate(self.spaceships):
-            cur_spaceship_pos = self._spaceship_trajectories[spaceship_idx][t/self.dt]
-            other_spaceship_pos = self._spaceship_trajectories[i][t/self.dt]
+            cur_spaceship_pos = self._spaceship_trajectories[spaceship_idx][index]
+            other_spaceship_pos = self._spaceship_trajectories[i][index]
             dist = np.sqrt(np.sum(np.square(spaceship_pos - other_spaceship_pos)))
 
             if dist < other_spaceship.radius:
@@ -109,7 +111,7 @@ class Environment:
         collisions = []
         for spaceship_idx, spaceship in enumerate(self.spaceships):
             for t in np.arange(0., 1., self.dt):
-                res = self._check_collision(spaceship_idx, t)
+                res = self._check_collision(spaceship_idx, int(t))
                 if res:
                     collisions.append(res)
         
@@ -121,7 +123,9 @@ class Environment:
         spaceships in the environment.
         """
         for i, spaceship in enumerate(self.spaceships):
-            spaceship.set_position(self._sanitise_position(self.navigator.vector(self, i)))
+            # TODO: This should be a step in the direction.
+            new_position = self.navigator.vector(self, i)
+            spaceship.set_position(self._sanitise_position(new_position))
             self._add_spaceship_pos(i, spaceship.position)
 
     def _step_asteroids(self):
