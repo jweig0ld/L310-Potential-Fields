@@ -15,8 +15,8 @@ TODO:
 2. (DONE). Plot the planets on the grid in 2D, where z=0.
 3. (DONE). Plot the asteroids on the grid in 2D, where z=0.
 4. (DONE). Plot the trajectories of the asteroids on the grid in 2D, where z=0.
-5. Plot the spaceships on the grid in 2D, where z=0.
-6. Plot the trajectories of the spaceships on the grid, where z=0.
+5. (DONE). Plot the spaceships on the grid in 2D, where z=0.
+6. (DONE). Plot the trajectories of the spaceships on the grid, where z=0.
 7. Plot the vector field of a spaceship where z=0.
 8. Allow for the specification of a z value that is not zero. 
 """

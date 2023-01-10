@@ -44,8 +44,8 @@ class Environment:
         self.planets = planets
         self.dt = dt
         self.navigator = navigator
-        self._spaceship_trajectories = [[] for _ in range(len(spaceships))]
-        self._asteroid_trajectories = [[] for _ in range(len(asteroids))]
+        self._spaceship_trajectories = [[s.position] for s in spaceships]
+        self._asteroid_trajectories = [[a.position] for a in asteroids]
         self._t = 0
 
     def _add_spaceship_pos(self, spaceship_idx, pos):
