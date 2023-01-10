@@ -54,6 +54,15 @@ class Environment:
     def _add_asteroid_pos(self, asteroid_idx, pos):
         self._asteroid_trajectories[asteroid_idx].append(pos)
 
+    def _can_move(self, pos):
+        """
+        Returns True if an object can continue to move, False
+        otherwise.
+        """
+        return not (pos[0] == abs(self.xlen/2) or \
+                    pos[1] == abs(self.ylen/2) or \
+                    pos[2] == abs(self.zlen/2))
+
     def _sanitise_position(self, pos):
         """
         Given a 3D position `pos`, ensures that the position lies witin the
@@ -123,8 +132,12 @@ class Environment:
         spaceships in the environment.
         """
         for i, spaceship in enumerate(self.spaceships):
-            # TODO: This should be a step in the direction.
-            new_position = self.navigator.vector(self, i)
+
+            if not self._can_move(spaceship.position):
+                self._add_spaceship_pos(i, spaceship.position)
+                continue
+
+            new_position = spaceship.position + self.navigator.vector(self, i)
             spaceship.set_position(self._sanitise_position(new_position))
             self._add_spaceship_pos(i, spaceship.position)
 
@@ -134,6 +147,11 @@ class Environment:
         spaceships in the environment.
         """
         for i, asteroid in enumerate(self.asteroids):
+
+            if not self._can_move(asteroid.position):
+                self._add_asteroid_pos(i, asteroid.position)
+                continue
+
             new_position = asteroid.position + asteroid.velocity * self.dt
             asteroid.set_position(self._sanitise_position(new_position))
             self._add_asteroid_pos(i, asteroid.position)
