@@ -18,7 +18,7 @@ TODO:
 5. (DONE). Plot the spaceships on the grid in 2D, where z=0.
 6. (DONE). Plot the trajectories of the spaceships on the grid, where z=0.
 7. Plot the vector field of a spaceship where z=0.
-8. Allow for the specification of a z value that is not zero. 
+8. (DONE). Allow for the specification of a z value that is not zero. 
 """
 
 
@@ -80,24 +80,11 @@ def plot_circular_objs(lst, z=0, color_str=None):
             plt.plot(x, y, color_str)
 
 
-def plot_env(env, z=0, filename=None):
-    plot_walls(env, z=z)
-    plot_circular_objs(env.planets, z=z, color_str='g')
-    plot_circular_objs(env.asteroids, z=z, color_str='r')
-    plot_circular_objs(env.spaceships, z=z, color_str='b')
-    plot_lines(env._asteroid_trajectories, color_str='r')
-    plot_lines(env._spaceship_trajectories, color_str='b')
-        
-    if filename:
-        plt.savefig(filename)
-
-
-def quiver_2d(env, navigator, spaceship_idx, filename=None):
+def plot_potential_field(env, spaceship_idx, t=None):
     """
-    Given the current location of a series of planets, asteroids and
-    spaceships (and the velocities of the asteroids and spaceships),
-    produce a 2D output illustrating the vector field associated with
-    one or more spaceships.
+    Given the location of a series of planets, asteroids and
+    spaceships at time `t`, produce the 2D vector field associated 
+    with the spaceship indexed by `spaceship_idx`.
     """
 
     # Potential Field Plotting
@@ -108,10 +95,27 @@ def quiver_2d(env, navigator, spaceship_idx, filename=None):
 
     for i in range(len(U)):
         for j in range(len(V)):
-            # velocity = navigator.vector(env, spaceship_idx)
-            velocity = np.array([1., 1.])
+            if t is not None:
+                velocity = env.navigator.vector(env.state_at_time(t), spaceship_idx)
+            else:
+                velocity = env.navigator.vector(env, spaceship_idx)
             U[i, j] = velocity[0]
             V[i, j] = velocity[1]
 
     plt.quiver(X, Y, U, V, units='width')
-    plt.show()
+
+
+def plot_env(env, z=0, t=None, filename=None):
+    plot_walls(env, z=z)
+    plot_circular_objs(env.planets, z=z, color_str='g')
+    plot_circular_objs(env.asteroids, z=z, color_str='r')
+    plot_circular_objs(env.spaceships, z=z, color_str='b')
+    plot_lines(env._asteroid_trajectories, color_str='r')
+    plot_lines(env._spaceship_trajectories, color_str='b')
+    plot_potential_field(env, 0, t=t)
+    if filename:
+        plt.savefig(filename)
+
+
+# def quiver_2d(env, navigator, spaceship_idx, filename=None):
+    

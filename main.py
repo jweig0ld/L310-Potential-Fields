@@ -26,5 +26,5 @@ if __name__ == "__main__":
     env = Environment(xlen, ylen, zlen, spaceships, asteroids, planets, dt, navigator)
     env.run()
     
-    plot_env(env, z=0, filename='test.png')
+    plot_env(env, z=0, t=0.5, filename='test.png')
     

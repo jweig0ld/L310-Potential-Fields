@@ -1,5 +1,6 @@
-import numpy as np
+from __future__ import annotations
 
+import numpy as np
 
 ASTEROID_COLLISION = 0
 PLANET_COLLISION = 1
@@ -155,6 +156,26 @@ class Environment:
             new_position = asteroid.position + asteroid.velocity * self.dt
             asteroid.set_position(self._sanitise_position(new_position))
             self._add_asteroid_pos(i, asteroid.position)
+
+    def state_at_time(self, t) -> Environment:
+        """
+        Given a time `t`, returns an Environment instance representing the state
+        of the calling environment at time `t`.
+        """
+        shorten = lambda lst, i : lst[:int(i/self.dt)]
+        a_trajectories = shorten(self._asteroid_trajectories, t)
+        s_trajectories = shorten(self._spaceship_trajectories, t)
+        new_env = Environment(self.xlen,
+                           self.ylen,
+                           self.zlen,
+                           self.spaceships,
+                           self.asteroids,
+                           self.planets,
+                           self.dt,
+                           self.navigator)
+        new_env._asteroid_trajectories = a_trajectories
+        new_env._spaceship_trajectories = s_trajectories
+        return new_env
 
     def run(self):
 
