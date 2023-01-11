@@ -121,9 +121,12 @@ class Environment:
 
         # Spaceship Collision Check
         for i, other_spaceship in enumerate(self.spaceships):
+            if i == spaceship_idx:
+                continue
+
             cur_spaceship_pos = self._spaceship_trajectories[spaceship_idx][index]
             other_spaceship_pos = self._spaceship_trajectories[i][index]
-            dist = np.sqrt(np.sum(np.square(spaceship_pos - other_spaceship_pos)))
+            dist = np.sqrt(np.sum(np.square(cur_spaceship_pos - other_spaceship_pos)))
 
             if dist < other_spaceship.radius:
                 return (spaceship_idx, SPACESHIP_COLLISION, i, spaceship_pos)
