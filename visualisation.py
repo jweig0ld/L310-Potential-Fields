@@ -48,6 +48,12 @@ def plot_lines(lst, color_str=None):
         plt.plot(x, y, color_str)
 
 
+def plot_marker(pos, marker_str=None, color_str=None):
+    color_str = color_str if color_str is not None else 'k'
+    marker_str = marker_str if marker_str is not None else 'D'
+    plt.plot(pos[0], pos[1], color_str, marker=marker_str)
+
+
 def plot_circular_objs(lst, z=0, color_str=None):
     """
     For a list of circular objects `lst` like Planets, Asteroids
@@ -64,6 +70,11 @@ def plot_circular_objs(lst, z=0, color_str=None):
             # Default to black if no color specified
             color_str = color_str if color_str is not None else 'k'
             plt.plot(x, y, color_str)
+
+
+def plot_goals(env):
+    for spaceship in env.spaceships:
+        plot_marker(spaceship.goal)
 
 
 def plot_potential_field(env, spaceship_idx, t=None):
@@ -98,6 +109,7 @@ def plot_env(env, z=0, t=None, potential_field=False, filename=None):
     plot_circular_objs(env.spaceships, z=z, color_str='b')
     plot_lines(env._asteroid_trajectories, color_str='r')
     plot_lines(env._spaceship_trajectories, color_str='b')
+    plot_goals(env)
 
     if potential_field:
         plot_potential_field(env, 0, t=t)
