@@ -8,20 +8,6 @@ RESOLUTION = 25
 GRID_OFFSET = 0.5
 
 
-"""
-TODO:
-
-1. (DONE). Plot the grid in 2D at z=0. 
-2. (DONE). Plot the planets on the grid in 2D, where z=0.
-3. (DONE). Plot the asteroids on the grid in 2D, where z=0.
-4. (DONE). Plot the trajectories of the asteroids on the grid in 2D, where z=0.
-5. (DONE). Plot the spaceships on the grid in 2D, where z=0.
-6. (DONE). Plot the trajectories of the spaceships on the grid, where z=0.
-7. Plot the vector field of a spaceship where z=0.
-8. (DONE). Allow for the specification of a z value that is not zero. 
-"""
-
-
 def find_circle(c, r, z=0):
     """
     Returns the centre and radius of the circle that results from the
@@ -115,7 +101,3 @@ def plot_env(env, z=0, t=None, filename=None):
     plot_potential_field(env, 0, t=t)
     if filename:
         plt.savefig(filename)
-
-
-# def quiver_2d(env, navigator, spaceship_idx, filename=None):
-    
