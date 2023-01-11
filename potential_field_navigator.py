@@ -16,4 +16,4 @@ class PotentialFieldNavigator():
         returned to prevent crazy spaceship trajectories.
         """
         # return attractive(env, spaceship_idx) + repulsive(env, spaceship_idx)
-        return np.array([0.5, 1, 0])
+        return np.array([0.1, 0.1, 0])
