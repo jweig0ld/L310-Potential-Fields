@@ -91,13 +91,16 @@ def plot_potential_field(env, spaceship_idx, t=None):
     plt.quiver(X, Y, U, V, units='width')
 
 
-def plot_env(env, z=0, t=None, filename=None):
+def plot_env(env, z=0, t=None, potential_field=False, filename=None):
     plot_walls(env, z=z)
     plot_circular_objs(env.planets, z=z, color_str='g')
     plot_circular_objs(env.asteroids, z=z, color_str='r')
     plot_circular_objs(env.spaceships, z=z, color_str='b')
     plot_lines(env._asteroid_trajectories, color_str='r')
     plot_lines(env._spaceship_trajectories, color_str='b')
-    plot_potential_field(env, 0, t=t)
+
+    if potential_field:
+        plot_potential_field(env, 0, t=t)
+    
     if filename:
         plt.savefig(filename)

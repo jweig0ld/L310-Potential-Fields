@@ -55,14 +55,32 @@ class Environment:
     def _add_asteroid_pos(self, asteroid_idx, pos):
         self._asteroid_trajectories[asteroid_idx].append(pos)
 
+    def _inside_planet(self, pos):
+        """
+        Returns True if `pos` is inside a planet. False otherwise.
+        """
+        for planet in self.planets:
+            dist = np.sqrt(np.sum(np.square(pos - planet.position)))
+            if dist < planet.radius:
+                return True
+        
+        return False
+
     def _can_move(self, pos):
         """
-        Returns True if an object can continue to move, False
+        Returns False if an object is either on the edge of one of the
+        dimensions of the environment or is inside a planet. True
         otherwise.
         """
-        return not (pos[0] == abs(self.xlen/2) or \
-                    pos[1] == abs(self.ylen/2) or \
-                    pos[2] == abs(self.zlen/2))
+        if (pos[0] == abs(self.xlen/2) or \
+            pos[1] == abs(self.ylen/2) or \
+            pos[2] == abs(self.zlen/2)):
+            return False
+
+        if self._inside_planet(pos):
+            return False
+
+        return True
 
     def _sanitise_position(self, pos):
         """
@@ -145,7 +163,7 @@ class Environment:
     def _step_asteroids(self):
         """
         Given current state of the environment, increment all of the positions of the
-        spaceships in the environment.
+        asteroids in the environment.
         """
         for i, asteroid in enumerate(self.asteroids):
 
