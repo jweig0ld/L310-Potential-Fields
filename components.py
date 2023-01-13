@@ -65,6 +65,34 @@ class Environment:
                 return True
         
         return False
+    
+    def _spherical_collision(self, sphere1, sphere2, r1=None, r2=None):
+        """
+        Given two spherical objects (both which have a `position` attr),
+        return True if there is overlap between the spheres at their
+        current positions i.e. there is a collision and False otherwise.
+        """
+        pos1, pos2, radius1, radius2 = None, None, None, None
+        radius_msg = "If you provide a pos array you must also provide a radius."
+        
+        if isinstance(sphere1, np.ndarray):
+            pos1 = sphere1
+            assert r1 is not None, radius_msg
+            radius1 = r1
+        else:
+            pos1 = sphere1.position
+            radius1 = sphere1.radius
+
+        if isinstance(sphere2, np.ndarray):
+            pos2 = sphere2
+            assert r2 is not None, radius_msg
+            radius2 = r2
+        else:
+            pos2 = sphere2.position
+            radius2 = sphere2.radius
+            
+        dist = np.sqrt(np.sum(np.square(pos1 - pos2)))
+        return (dist <= radius1 + radius2)
 
     def _can_move(self, pos):
         """
@@ -100,21 +128,20 @@ class Environment:
         """
         index = int(t/self.dt)
         spaceship_pos = self._spaceship_trajectories[spaceship_idx][index]
+        spaceship_radius = self.spaceships[spaceship_idx].radius
 
         # Asteroid Collision Check
-        for i in range(len(self._asteroid_trajectories)):
+        for i, asteroid in enumerate(self.asteroids):
             asteroid_pos = self._asteroid_trajectories[i][index]
-            dist = np.sqrt(np.sum(np.square(spaceship_pos - asteroid_pos)))
-
-            if dist < self.asteroids[i].radius:
-                # We only care about the first collision
+            if self._spherical_collision(spaceship_pos, asteroid_pos, r1=spaceship_radius, r2=asteroid.radius):
                 return (spaceship_idx, ASTEROID_COLLISION, i, spaceship_pos)
+                
             
         # Planetary Collision Check
         for i, planet in enumerate(self.planets):
-            dist = np.sqrt(np.sum(np.square(spaceship_pos - planet.position)))
-            if dist < planet.radius:
+            if self._spherical_collision(planet, spaceship_pos, r2=spaceship_radius):
                 return (spaceship_idx, PLANET_COLLISION, i, spaceship_pos)
+                
 
         # Spaceship Collision Check
         for i, other_spaceship in enumerate(self.spaceships):
@@ -122,8 +149,7 @@ class Environment:
                 continue
 
             other_spaceship_pos = self._spaceship_trajectories[i][index]
-            dist = np.sqrt(np.sum(np.square(spaceship_pos - other_spaceship_pos)))
-            if dist < other_spaceship.radius:
+            if self._spherical_collision(spaceship_pos, other_spaceship_pos, r1=spaceship_radius, r2=other_spaceship.radius):
                 return (spaceship_idx, SPACESHIP_COLLISION, i, spaceship_pos)
         
         return None
