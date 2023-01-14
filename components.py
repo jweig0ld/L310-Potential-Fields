@@ -25,6 +25,9 @@ class Spaceship:
     def set_position(self, new_position):
         self.position = new_position
 
+    def at_goal(self):
+        return euclidean_distance(self.position, self.goal) < 0.1
+
 
 class Asteroid:
     def __init__(self, position, radius, velocity):
@@ -157,6 +160,7 @@ class Environment:
                 res = self._check_collision(spaceship_idx, t)
                 if res is not None:
                     collisions.append(res)
+                    break
         
         return collisions
     
@@ -216,7 +220,12 @@ class Environment:
         planet_dists = [euclidean_distance(planet.position, pos) for planet in self.planets]
         asteroid_dists = [euclidean_distance(asteroid.position, pos) for asteroid in self.asteroids]
         spaceship_dists = [euclidean_distance(spaceship.position, pos) for spaceship in self.spaceships]
-        min_dist = np.min(np.array([planet_dists, asteroid_dists, spaceship_dists]))
+        dists = [*planet_dists, *asteroid_dists, *spaceship_dists]
+        
+        if not planet_dists and not asteroid_dists and not spaceship_dists:
+            return np.random.uniform(high=self.xlen/4 * scale)
+            
+        min_dist = np.amin(np.array(dists))
 
         return np.random.uniform(high=min_dist * scale)
 
