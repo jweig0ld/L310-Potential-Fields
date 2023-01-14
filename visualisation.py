@@ -2,26 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from components import *
+from math_utils import find_circle
 
 
 RESOLUTION = 25
 GRID_OFFSET = 0.5
-
-
-def find_circle(c, r, z=0):
-    """
-    Returns the centre and radius of the circle that results from the
-    intersection of the plane z=k and the sphere with centre `c` and 
-    radius `r`. If there is no intersection, return (None, None).
-    """
-    if not (z > c[2] - r and z < c[2] + r):
-        return (None, None)
-
-    centre = c.copy()
-    centre[2] = z
-    d = z - c[2] # Distance between centre of resultant circle and plane z=k.
-    radius = np.sqrt(np.square(r) - np.square(d))
-    return centre, radius
 
 
 def plot_walls(env, z=0):

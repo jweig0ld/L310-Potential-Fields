@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from math_utils import euclidean_distance, spherical_collision
+
+
 ASTEROID_COLLISION = 0
 PLANET_COLLISION = 1
 SPACESHIP_COLLISION = 2
@@ -11,6 +14,7 @@ class Planet:
     def __init__(self, position, radius):
         self.position = position
         self.radius = radius
+
 
 class Spaceship:
     def __init__(self, position, radius, goal):
@@ -52,23 +56,20 @@ class Environment:
     def _add_asteroid_pos(self, asteroid_idx, pos):
         self._asteroid_trajectories[asteroid_idx].append(pos)
 
-    def _euclidean_distance(self, a, b):
-        return np.sqrt(np.sum(np.square(a - b)))
-
     def _inside_obj(self, pos):
         """
         Returns True if `pos` is inside a Planet, Asteroid or Spaceship.
         """
         for planet in self.planets:
-            if self._euclidean_distance(pos, planet.position) < planet.radius:
+            if euclidean_distance(pos, planet.position) < planet.radius:
                 return True
         
         for asteroid in self.asteroids:
-            if self._euclidean_distance(pos, asteroid.position) < asteroid.radius:
+            if euclidean_distance(pos, asteroid.position) < asteroid.radius:
                 return True
             
         for spaceship in self.spaceships:
-            if self._euclidean_distance(pos, spaceship.position) < spaceship.radius:
+            if euclidean_distance(pos, spaceship.position) < spaceship.radius:
                 return True
 
         return False
@@ -78,39 +79,11 @@ class Environment:
         Returns True if `pos` is inside a planet. False otherwise.
         """
         for planet in self.planets:
-            dist = np.sqrt(np.sum(np.square(pos - planet.position)))
+            dist = euclidean_distance(pos, planet.position)
             if dist < planet.radius:
                 return True
         
         return False
-    
-    def _spherical_collision(self, sphere1, sphere2, r1=None, r2=None):
-        """
-        Given two spherical objects (both which have a `position` attr),
-        return True if there is overlap between the spheres at their
-        current positions i.e. there is a collision and False otherwise.
-        """
-        pos1, pos2, radius1, radius2 = None, None, None, None
-        radius_msg = "If you provide a pos array you must also provide a radius."
-        
-        if isinstance(sphere1, np.ndarray):
-            pos1 = sphere1
-            assert r1 is not None, radius_msg
-            radius1 = r1
-        else:
-            pos1 = sphere1.position
-            radius1 = sphere1.radius
-
-        if isinstance(sphere2, np.ndarray):
-            pos2 = sphere2
-            assert r2 is not None, radius_msg
-            radius2 = r2
-        else:
-            pos2 = sphere2.position
-            radius2 = sphere2.radius
-            
-        dist = np.sqrt(np.sum(np.square(pos1 - pos2)))
-        return (dist <= radius1 + radius2)
 
     def _can_move(self, pos):
         """
@@ -151,13 +124,13 @@ class Environment:
         # Asteroid Collision Check
         for i, asteroid in enumerate(self.asteroids):
             asteroid_pos = self._asteroid_trajectories[i][index]
-            if self._spherical_collision(spaceship_pos, asteroid_pos, r1=spaceship_radius, r2=asteroid.radius):
+            if spherical_collision(spaceship_pos, asteroid_pos, r1=spaceship_radius, r2=asteroid.radius):
                 return (spaceship_idx, ASTEROID_COLLISION, i, spaceship_pos)
                 
             
         # Planetary Collision Check
         for i, planet in enumerate(self.planets):
-            if self._spherical_collision(planet, spaceship_pos, r2=spaceship_radius):
+            if spherical_collision(planet, spaceship_pos, r2=spaceship_radius):
                 return (spaceship_idx, PLANET_COLLISION, i, spaceship_pos)
                 
 
@@ -167,7 +140,7 @@ class Environment:
                 continue
 
             other_spaceship_pos = self._spaceship_trajectories[i][index]
-            if self._spherical_collision(spaceship_pos, other_spaceship_pos, r1=spaceship_radius, r2=other_spaceship.radius):
+            if spherical_collision(spaceship_pos, other_spaceship_pos, r1=spaceship_radius, r2=other_spaceship.radius):
                 return (spaceship_idx, SPACESHIP_COLLISION, i, spaceship_pos)
         
         return None
@@ -230,6 +203,22 @@ class Environment:
             sample = np.random.uniform(low=low, high=high, size=3)
         
         return sample
+
+    def sample_valid_radius(self, pos, scale):
+        """
+        For a spherical object centered at pos, sample a radius
+        which is less than the distance to the nearest other
+        object in the environment. The `scale` parameter [0,1]
+        is a number which controls how much space you want there
+        to be between the objects in the environment, and thus
+        indirectly how large the objects are.
+        """
+        planet_dists = [euclidean_distance(planet.position, pos) for planet in self.planets]
+        asteroid_dists = [euclidean_distance(asteroid.position, pos) for asteroid in self.asteroids]
+        spaceship_dists = [euclidean_distance(spaceship.position, pos) for spaceship in self.spaceships]
+        min_dist = np.min(np.array([planet_dists, asteroid_dists, spaceship_dists]))
+
+        return np.random.uniform(high=min_dist * scale)
 
     def add_spaceship(self, spaceship):
         self.spaceships.append(spaceship)
