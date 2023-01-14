@@ -55,6 +55,27 @@ class Environment:
     def _add_asteroid_pos(self, asteroid_idx, pos):
         self._asteroid_trajectories[asteroid_idx].append(pos)
 
+    def _euclidean_distance(self, a, b):
+        return np.sqrt(np.sum(np.square(a - b)))
+
+    def _inside_obj(self, pos):
+        """
+        Returns True if `pos` is inside a Planet, Asteroid or Spaceship.
+        """
+        for planet in self.planets:
+            if self._euclidean_distance(pos, planet.position) < planet.radius:
+                return True
+        
+        for asteroid in self.asteroids:
+            if self._euclidean_distance(pos, asteroid.position) < asteroid.radius:
+                return True
+            
+        for spaceship in self.spaceships:
+            if self._euclidean_distance(pos, spaceship.position) < spaceship.radius:
+                return True
+
+        return False
+
     def _inside_planet(self, pos):
         """
         Returns True if `pos` is inside a planet. False otherwise.
@@ -198,6 +219,20 @@ class Environment:
             new_position = asteroid.position + asteroid.velocity * self.dt
             asteroid.set_position(self._sanitise_position(new_position))
             self._add_asteroid_pos(i, asteroid.position)
+
+    def sample_valid_position(self):
+        """
+        Return a random position inside the environment which is 
+        not inside an existing object.
+        """
+        low = [-self.xlen/2, -self.ylen/2, -self.zlen/2]
+        high = [self.xlen/2, self.ylen/2, self.zlen/2]
+
+        sample = np.random.uniform(low=low, high=high, size=3)
+        while self._inside_obj(sample):
+            sample = np.random.uniform(low=low, high=high, size=3)
+        
+        return sample
 
     def state_at_time(self, t) -> Environment:
         """
