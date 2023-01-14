@@ -8,11 +8,9 @@ SPACESHIP_COLLISION = 2
 
 
 class Planet:
-    def __init__(self, position, radius, mass):
+    def __init__(self, position, radius):
         self.position = position
         self.radius = radius
-        self.mass = mass
-
 
 class Spaceship:
     def __init__(self, position, radius, goal):
@@ -25,11 +23,10 @@ class Spaceship:
 
 
 class Asteroid:
-    def __init__(self, position, radius, velocity, mass):
+    def __init__(self, position, radius, velocity):
         self.position = position
         self.radius = radius
         self.velocity = velocity
-        self.mass = mass
 
     def set_position(self, new_position):
         self.position = new_position
@@ -233,6 +230,17 @@ class Environment:
             sample = np.random.uniform(low=low, high=high, size=3)
         
         return sample
+
+    def add_spaceship(self, spaceship):
+        self.spaceships.append(spaceship)
+        self._spaceship_trajectories.append([spaceship.position])
+
+    def add_asteroid(self, asteroid):
+        self.asteroids.append(asteroid)
+        self._asteroid_trajectories.append([asteroid.position])
+    
+    def add_planet(self, planet):
+        self.planets.append(planet)
 
     def state_at_time(self, t) -> Environment:
         """
