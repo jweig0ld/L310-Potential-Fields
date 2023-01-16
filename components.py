@@ -64,15 +64,15 @@ class Environment:
         Returns True if `pos` is inside a Planet, Asteroid or Spaceship.
         """
         for planet in self.planets:
-            if euclidean_distance(pos, planet.position) < planet.radius:
+            if euclidean_distance(pos, planet.position) <= planet.radius:
                 return True
         
         for asteroid in self.asteroids:
-            if euclidean_distance(pos, asteroid.position) < asteroid.radius:
+            if euclidean_distance(pos, asteroid.position) <= asteroid.radius:
                 return True
             
         for spaceship in self.spaceships:
-            if euclidean_distance(pos, spaceship.position) < spaceship.radius:
+            if euclidean_distance(pos, spaceship.position) <= spaceship.radius:
                 return True
 
         return False
@@ -194,7 +194,7 @@ class Environment:
             asteroid.set_position(self._sanitise_position(new_position))
             self._add_asteroid_pos(i, asteroid.position)
 
-    def sample_valid_position(self):
+    def sample_valid_position(self, radius=None):
         """
         Return a random position inside the environment which is 
         not inside an existing object.
@@ -203,8 +203,26 @@ class Environment:
         high = [self.xlen/2, self.ylen/2, self.zlen/2]
 
         sample = np.random.uniform(low=low, high=high, size=3)
-        while self._inside_obj(sample):
-            sample = np.random.uniform(low=low, high=high, size=3)
+        if not radius:
+            while self._inside_obj(sample):
+                sample = np.random.uniform(low=low, high=high, size=3)
+        else:
+            obj_collision = True
+            while obj_collision:
+                sample = np.random.uniform(low=low, high=high, size=3)
+                obj_collision = False
+                for planet in self.planets:
+                    if spherical_collision(planet, sample, r2=radius):
+                        obj_collision = True
+                        break
+                for asteroid in self.asteroids:
+                    if spherical_collision(asteroid, sample, r2=radius):
+                        obj_collision = True
+                        break
+                for spaceship in self.spaceships:
+                    if spherical_collision(spaceship, sample, r2=radius):
+                        obj_collision = True
+                        break
         
         return sample
 

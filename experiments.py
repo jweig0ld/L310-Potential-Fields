@@ -14,27 +14,23 @@ def sample_environment(xlen, ylen, zlen, n_planets, n_asteroids, n_spaceships, s
     env = Environment(xlen, ylen, zlen, [], [], [], dt, navigator)
 
     for _ in range(n_planets):
-        pos = env.sample_valid_position()
-        # r = env.sample_valid_radius(pos, PLANET_SCALE)
-        r = 1.
+        r = 2.
+        pos = env.sample_valid_position(radius=r)
         env.add_planet(Planet(pos, r))
-        print(f'New Planet: Position {pos} with Radius {r}.')
+        # print(f'New Planet: Position {pos} with Radius {r}.')
 
     for _ in range(n_asteroids):
-        pos = env.sample_valid_position()
-        # r = env.sample_valid_radius(pos, ASTEROID_SCALE)
-        r = 0.2
+        r = 0.5
+        pos = env.sample_valid_position(radius=r)
         vel = normalise(np.random.uniform(size=3), scale=dt)
         env.add_asteroid(Asteroid(pos, r, vel))
-        print(f'New Asteroid: Position {pos} with Radius {r}.')
+        # print(f'New Asteroid: Position {pos} with Radius {r}.')
     
     for _ in range(n_spaceships):
-        pos = env.sample_valid_position()
+        pos = env.sample_valid_position(radius=spaceship_radius)
         goal = env.sample_valid_position()
-        # r = env.sample_valid_radius(pos, SPACESHIP_SCALE)
-        r = spaceship_radius
         env.add_spaceship(Spaceship(pos, r, goal))
-        print(f'New Spaceship: Position {pos} with Radius {r}.')
+        # print(f'New Spaceship: Position {pos} with Radius {r}.')
 
     return env
     
@@ -86,5 +82,6 @@ def collision_rate_experiment(config):
         'fail': fail/config['n_runs'],
         'asteroid': a_collisions/config['n_runs'],
         'spaceship': s_collisions/config['n_runs'],
-        'planet': p_collisions/config['n_runs']
+        'planet': p_collisions/config['n_runs'],
+        'minima':(fail - a_collisions - s_collisions - p_collisions)/config['n_runs']
     }
