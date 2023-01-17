@@ -94,10 +94,18 @@ class Environment:
         dimensions of the environment or is inside a planet. True
         otherwise.
         """
-        if (pos[0] == abs(self.xlen/2) or \
-            pos[1] == abs(self.ylen/2) or \
-            pos[2] == abs(self.zlen/2)):
-            return False
+
+        # 2D
+        if self.zlen == 0:
+            if (pos[0] == abs(self.xlen/2) or \
+                pos[1] == abs(self.ylen/2)):
+                    return False
+        # 3D
+        else:
+            if (pos[0] == abs(self.xlen/2) or \
+                pos[1] == abs(self.ylen/2) or \
+                pos[2] == abs(self.zlen/2)):
+                return False
 
         if self._inside_planet(pos):
             return False
@@ -170,7 +178,6 @@ class Environment:
         spaceships in the environment.
         """
         for i, spaceship in enumerate(self.spaceships):
-
             if not self._can_move(spaceship.position):
                 self._add_spaceship_pos(i, spaceship.position)
                 continue

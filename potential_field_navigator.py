@@ -67,12 +67,12 @@ class ProposedPotentialFieldNavigator():
         spaceship = env.spaceships[spaceship_idx]
         for planet in env.planets:
             dist = euclidean_distance(spaceship.position, planet.position) - planet.radius - spaceship.radius
-            weight = np.exp(-3 * dist)
+            weight = np.exp(-7 * dist)
             result += weight * (spaceship.position - planet.position)
 
         for asteroid in env.asteroids:
             dist = euclidean_distance(spaceship.position, asteroid.position) - asteroid.radius - spaceship.radius
-            weight = np.exp(-3 * dist)
+            weight = np.exp(-7 * dist)
             result += weight * (spaceship.position - asteroid.position)
 
         for other_spaceship in env.spaceships:
@@ -80,7 +80,7 @@ class ProposedPotentialFieldNavigator():
                 continue 
 
             dist = euclidean_distance(spaceship.position, other_spaceship.position) - other_spaceship.radius - spaceship.radius
-            weight = np.exp(-3 * dist)
+            weight = np.exp(-7 * dist)
             result += weight * (spaceship.position - other_spaceship.position)
         
         return max_normalise(result)
@@ -91,4 +91,7 @@ class ProposedPotentialFieldNavigator():
         return normalise(direction)
 
     def vector(self, env, spaceship_idx):
-        return normalise(self.attractive(env, spaceship_idx) + self.repulsive(env, spaceship_idx), scale=0.1)
+        additive = self.attractive(env, spaceship_idx) + self.repulsive(env, spaceship_idx)
+        if np.linalg.norm(additive) < 0.0:
+            additive = additive + np.random.normal(size=3)
+        return normalise(additive, scale=0.1)

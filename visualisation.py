@@ -101,3 +101,53 @@ def plot_env(env, z=0, t=None, potential_field=False, filename=None):
     
     if filename:
         plt.savefig(filename)
+
+
+def plot_xy(x, y, xlabel, ylabel, filename=None):
+    plt.plot(x, y)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    if filename:
+        plt.savefig(filename)
+
+    plt.show()
+
+
+def plot_lines_2(x, y1, y2, y1_label, y2_label, xlabel, ylabel, filename=None):
+    fig, ax = plt.subplots()
+    ax.plot(x, y1, label=y1_label)
+    ax.plot(x, y2, label=y2_label)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.legend()
+    if filename:
+        plt.savefig(filename)
+    plt.show()
+
+
+def plot_results_dict(results, x, xlabel, ylabel, filename=None):
+    success, fail, asteroid, spaceship, planet, minima = [], [], [], [], [], []
+    for result in results:
+        success.append(result['success'])
+        fail.append(result['fail'])
+        asteroid.append(result['asteroid'])
+        spaceship.append(result['spaceship'])
+        planet.append(result['planet'])
+        minima.append(result['minima'])
+
+    fig, ax = plt.subplots()
+    ax.plot(x, success, label="Success")
+    ax.plot(x, fail, label="Fail")
+    ax.plot(x, asteroid, label="Asteroid")
+    ax.plot(x, spaceship, label="Spaceship")
+    ax.plot(x, planet, label="Planet")
+    ax.plot(x, minima, label="Minima")
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    ax.legend()
+    if filename:
+        plt.savefig(filename)
+    plt.show()

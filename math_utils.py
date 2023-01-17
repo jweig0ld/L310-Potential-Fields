@@ -12,6 +12,13 @@ def normalise(v, scale=1.):
     return scale * (v / norm)
 
 
+def max_normalise(v):
+    norm = np.linalg.norm(v)
+    if norm < 1: 
+        return v
+    return (v / norm)
+
+
 def find_circle(c, r, z=0):
     """
     Returns the centre and radius of the circle that results from the
@@ -53,5 +60,5 @@ def spherical_collision(sphere1, sphere2, r1=None, r2=None):
         pos2 = sphere2.position
         radius2 = sphere2.radius
         
-    dist = np.sqrt(np.sum(np.square(pos1 - pos2)))
+    dist = euclidean_distance(pos1, pos2)
     return (dist <= radius1 + radius2)
